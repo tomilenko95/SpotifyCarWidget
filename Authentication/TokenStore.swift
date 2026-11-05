@@ -15,14 +15,17 @@ protocol TokenStoring: Sendable {
 
 struct KeychainTokenStore: TokenStoring {
     var group: String? = AppConfiguration.current.keychainGroup
-    private var query: [String: Any] {
+    private var query: [String: Any] { get throws {
         var result: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: "SpotifyCarWidget.OAuth", kSecAttrAccount as String: "spotify"]
-        if !AppConfiguration.personalDemo, let group, !group.isEmpty { result[kSecAttrAccessGroup as String] = group }
+        if AppConfiguration.personalSpotify {
+            // Access-group discovery failures must propagate, rather than silently using a private item.
+            result[kSecAttrAccessGroup as String] = try SharedKeychain.accessGroup
+        } else if !AppConfiguration.personalDemo, let group, !group.isEmpty { result[kSecAttrAccessGroup as String] = group }
         return result
-    }
+    } }
     func read() throws -> OAuthTokens? {
-        var q = query
+        var q = try query
         q[kSecReturnData as String] = true
         q[kSecMatchLimit as String] = kSecMatchLimitOne
         var item: CFTypeRef?
@@ -32,6 +35,7 @@ struct KeychainTokenStore: TokenStoring {
         return try JSONDecoder().decode(OAuthTokens.self, from: data)
     }
     func write(_ tokens: OAuthTokens) throws {
+        let query = try self.query
         let attributes: [String: Any] = [kSecValueData as String: try JSONEncoder().encode(tokens),
             kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly]
         let status = SecItemUpdate(query as CFDictionary, attributes as CFDictionary)
@@ -41,7 +45,7 @@ struct KeychainTokenStore: TokenStoring {
         } else if status != errSecSuccess { throw OAuthError.keychain(status) }
     }
     func clear() throws {
-        let status = SecItemDelete(query as CFDictionary)
+        let status = SecItemDelete(try query as CFDictionary)
         guard status == errSecSuccess || status == errSecItemNotFound else { throw OAuthError.keychain(status) }
     }
 }

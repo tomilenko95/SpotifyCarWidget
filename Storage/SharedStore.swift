@@ -10,8 +10,13 @@ struct StoredPlayback: Codable, Sendable {
 
 struct SharedStore: Sendable {
     let root: URL
-    init(root: URL) { self.root = root }
+    let sharedKeychain: SharedKeychain?
+    init(root: URL, sharedKeychain: SharedKeychain? = nil) { self.root = root; self.sharedKeychain = sharedKeychain }
     static func live() throws -> Self {
+        if AppConfiguration.personalSpotify {
+            let local = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            return Self(root: local.appendingPathComponent("PersonalSpotify", isDirectory: true), sharedKeychain: SharedKeychain())
+        }
         if AppConfiguration.personalDemo {
             let local = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             return Self(root: local.appendingPathComponent("PersonalDemo", isDirectory: true))
@@ -26,10 +31,18 @@ struct SharedStore: Sendable {
     }
     var stateURL: URL { root.appendingPathComponent("playback.json") }
     func read() throws -> StoredPlayback {
+        if let sharedKeychain {
+            guard let data = try sharedKeychain.read("playback") else { return StoredPlayback() }
+            return try JSONDecoder().decode(StoredPlayback.self, from: data)
+        }
         guard FileManager.default.fileExists(atPath: stateURL.path) else { return StoredPlayback() }
         return try JSONDecoder().decode(StoredPlayback.self, from: Data(contentsOf: stateURL))
     }
     func write(_ state: StoredPlayback) throws {
+        if let sharedKeychain {
+            try sharedKeychain.write(JSONEncoder().encode(state), account: "playback")
+            return
+        }
         try prepare()
         try JSONEncoder().encode(state).write(to: stateURL, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
     }
@@ -38,6 +51,7 @@ struct SharedStore: Sendable {
 enum SharedGate {
     // flock is released by the OS if an extension is terminated. Atomic JSON writes protect readers.
     static func withLock<T>(store: SharedStore, operation: () async throws -> T) async throws -> T {
+        if let sharedKeychain = store.sharedKeychain { return try await sharedKeychain.withLease(operation) }
         try store.prepare()
         let descriptor = open(store.root.appendingPathComponent("playback.lock").path, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR)
         guard descriptor >= 0 else { throw APIError.storage }

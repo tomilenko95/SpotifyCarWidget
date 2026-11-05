@@ -15,4 +15,8 @@
 <key>AppGroup</key><string>$(APP_GROUP)</string>
 <key>KeychainGroup</key><string>$(KEYCHAIN_GROUP)</string>
 <key>ITSAppUsesNonExemptEncryption</key><false/>
+<key>CFBundleURLTypes</key><array><dict>
+<key>CFBundleURLName</key><string>CarWidget Spotify OAuth</string>
+<key>CFBundleURLSchemes</key><array><string>com.tomilenko95.carwidget</string></array>
+</dict></array>
 </dict></plist>

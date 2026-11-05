@@ -13,6 +13,9 @@ xcodebuild test -project SpotifyCarWidget.xcodeproj -scheme SpotifyCarWidget \
 xcodebuild build -project SpotifyCarWidget.xcodeproj -scheme SpotifyCarWidgetPersonal \
   -configuration Personal -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
   -derivedDataPath build/Personal CODE_SIGNING_ALLOWED=NO
+xcodebuild build -project SpotifyCarWidget.xcodeproj -scheme SpotifyCarWidgetPersonalSpotify \
+  -configuration PersonalSpotify -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+  -derivedDataPath build/PersonalSpotify CODE_SIGNING_ALLOWED=NO
 PERSONAL_APP=build/Personal/Build/Products/Personal-iphonesimulator/SpotifyCarWidget.app
 APP_ID=$(/usr/libexec/PlistBuddy -c 'Print CFBundleIdentifier' "$PERSONAL_APP/Info.plist")
 xcrun simctl bootstatus "$DEST_ID" -b

@@ -136,6 +136,17 @@ struct SettingsScreen: View {
                     Text("Системная").tag("system"); Text("Светлая").tag("light"); Text("Тёмная").tag("dark")
                 }
             }
+            if AppConfiguration.personalSpotify {
+                Section("Связь с виджетами") {
+                    Text("Сборка Spotify Personal использует общий Keychain. Доступ зависит от фактической подписи приложения и расширения.")
+                        .font(.caption).foregroundStyle(.secondary)
+                    Button("Проверить общий доступ") { model.checkWidgetConnection() }.disabled(model.busy)
+                    Button("Показать результат проверки") { model.refreshWidgetConnection() }
+                    Text(model.widgetConnection).font(.caption)
+                    Text("Добавьте любой виджет CarWidget на домашний экран, нажмите проверку и вернитесь к виджету. После его обновления откройте здесь результат.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+            }
             Section("Демонстрация") {
                 Toggle("Демо без интернета", isOn: Binding(get: { model.demo }, set: { model.setDemo($0) }))
                     .disabled(AppConfiguration.personalDemo || model.busy)

@@ -10,7 +10,7 @@ enum OAuthError: LocalizedError {
         case .invalidCallback: return "Неверный адрес OAuth callback."
         case .invalidState: return "Проверка OAuth state не пройдена. Войдите заново."
         case .denied: return "Авторизация отменена или отклонена."
-        case .configuration: return "Настройте Client ID, HTTPS callback и Associated Domains."
+        case .configuration: return "Настройте Client ID и зарегистрированный callback Spotify. Для HTTPS нужны Associated Domains."
         case .missingToken: return "Необходим повторный вход в Spotify."
         case .keychain: return "Хранилище недоступно. Проверьте подпись и разблокируйте iPhone."
         }

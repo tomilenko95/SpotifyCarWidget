@@ -7,12 +7,18 @@ final class PlaybackViewModel: ObservableObject {
     @Published private(set) var loggedIn = false
     @Published private(set) var demo = true
     @Published var error: String?
+    @Published private(set) var widgetConnection = "Проверка ещё не запускалась"
     let service: SpotifyPlaybackService
     private let auth = SpotifyAuthenticator()
     private var task: Task<Void, Never>?
+    private var authenticating = false
     init(service: SpotifyPlaybackService = .shared) { self.service = service }
     func activate() { guard !busy else { return }; launch { await self.update() } }
-    func suspend() { task?.cancel(); busy = false; auth.cancel(); Task { await service.cancelRefresh() } }
+    func suspend() {
+        // An OAuth browser may hand off to Spotify temporarily. Keep its pending state/verifier in memory.
+        guard !authenticating else { return }
+        task?.cancel(); busy = false; auth.cancel(); Task { await service.cancelRefresh() }
+    }
     func refresh() { guard !busy else { return }; launch { await self.update() } }
     func command(_ command: PlaybackCommand) {
         guard !busy else { return }
@@ -23,6 +29,8 @@ final class PlaybackViewModel: ObservableObject {
     }
     func login() {
         launch {
+            self.authenticating = true
+            defer { self.authenticating = false }
             do { try await self.auth.login(service: self.service); await self.update() }
             catch is CancellationError { }
             catch { self.error = error.localizedDescription }
@@ -40,10 +48,21 @@ final class PlaybackViewModel: ObservableObject {
             catch { self.error = error.localizedDescription }
         }
     }
+    func checkWidgetConnection() {
+        launch {
+            do {
+                try WidgetConnectionCheck.request()
+                await self.service.reloadWidgets()
+                self.widgetConnection = WidgetConnectionCheck.status()
+            } catch { self.error = error.localizedDescription }
+        }
+    }
+    func refreshWidgetConnection() { widgetConnection = WidgetConnectionCheck.status() }
     private func update() async {
         let value = await service.refresh()
         guard !Task.isCancelled else { return }
         snapshot = value; demo = await service.isDemo(); loggedIn = await service.loggedIn()
+        if AppConfiguration.personalSpotify { widgetConnection = WidgetConnectionCheck.status() }
         await service.reloadWidgets()
     }
     private func launch(_ operation: @escaping @MainActor () async -> Void) {

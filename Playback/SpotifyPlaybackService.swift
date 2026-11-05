@@ -45,7 +45,7 @@ actor SpotifyPlaybackService {
     private func refreshOperation() async -> PlaybackSnapshot {
         do {
             let store = try requiredStore()
-            return try await SharedGate.withLock(store: store) {
+            let snapshot = try await SharedGate.withLock(store: store) {
                 var state = try store.read()
                 if state.demo { try store.write(state); return state.snapshot }
                 if let until = state.spotifyRetryAfter, until > Date() {
@@ -59,7 +59,15 @@ actor SpotifyPlaybackService {
                 catch { self.record(error, state: &state); try store.write(state) }
                 return state.snapshot
             }
+            return await localArtwork(for: snapshot)
         } catch { return failure(error) }
+    }
+    private func localArtwork(for value: PlaybackSnapshot) async -> PlaybackSnapshot {
+        var value = value
+        if value.source == .spotify, let url = value.artworkURL {
+            value.artworkKey = (try? await artwork?.cache(url)) ?? value.artworkKey
+        }
+        return value
     }
     private func loadLive() async throws -> PlaybackSnapshot {
         var snapshot = try await api.playback()

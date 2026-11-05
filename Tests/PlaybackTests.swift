@@ -4,6 +4,13 @@ import AppIntents
 @testable import SpotifyCarWidget
 
 final class PlaybackTests: XCTestCase {
+    func testSharedLeaseHasBoundedExpiryAndPreservesOwner() throws {
+        let now = Date()
+        let lease = SharedLeaseRecord(owner: "owner-one", expiresAt: now.addingTimeInterval(120))
+        XCTAssertFalse(lease.isExpired(at: now))
+        XCTAssertTrue(lease.isExpired(at: now.addingTimeInterval(120)))
+        XCTAssertEqual(try JSONDecoder().decode(SharedLeaseRecord.self, from: JSONEncoder().encode(lease)), lease)
+    }
     func testRealProgressDoesNotInventRealtimeUpdates() {
         var value = DemoLibrary.snapshot(index: 0); value.source = .spotify
         XCTAssertEqual(value.progress(at: value.observedAt.addingTimeInterval(600)), value.progressMS)

@@ -1,0 +1,5 @@
+#include "Spotify.xcconfig"
+// Public OAuth client ID, never a client secret. Callback confirmed in Spotify Dashboard.
+SPOTIFY_CLIENT_ID = 506cf39c81a9492595d15f62cce78673
+SPOTIFY_REDIRECT_URI = com.tomilenko95.carwidget:/$()/spotify/callback
+KEYCHAIN_GROUP = $(AppIdentifierPrefix)com.carwidget.shared

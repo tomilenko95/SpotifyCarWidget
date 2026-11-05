@@ -13,10 +13,20 @@ struct AppConfiguration: Sendable {
                     keychainGroup: info["KeychainGroup"] as? String)
     }
     var callbackURL: URL? {
-        guard let url = URL(string: redirectURI), url.scheme == "https",
-              let host = url.host, !host.hasSuffix("example.com"),
+        guard let url = URL(string: redirectURI), let scheme = url.scheme,
+              let host = url.host, url.user == nil, url.password == nil,
               url.query == nil, url.fragment == nil, !url.path.isEmpty else { return nil }
+        if scheme == "https" { guard !host.hasSuffix("example.com") else { return nil } }
+        else { guard scheme == Self.nativeCallbackScheme, host == "spotify", url.path == "/callback", url.port == nil else { return nil } }
         return url
+    }
+    static let nativeCallbackScheme = "com.tomilenko95.carwidget"
+    static var personalSpotify: Bool {
+        #if PERSONAL_SPOTIFY
+        return true
+        #else
+        return false
+        #endif
     }
     var canAuthenticate: Bool {
         #if PERSONAL_DEMO

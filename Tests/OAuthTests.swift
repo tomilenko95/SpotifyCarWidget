@@ -34,6 +34,21 @@ final class OAuthTests: XCTestCase {
     func testFormEscapesReservedCharacters() {
         XCTAssertEqual(String(data: HTTPClient.form(["code": "a+b&c=d"]), encoding: .utf8), "code=a%2Bb%26c%3Dd")
     }
+    func testRegisteredNativeCallbackAndStateValidation() throws {
+        let config = AppConfiguration(clientID: Fixtures.config.clientID,
+            redirectURI: "com.tomilenko95.carwidget://spotify/callback", appGroup: "", keychainGroup: nil)
+        let redirect = try XCTUnwrap(config.callbackURL)
+        XCTAssertEqual(try PKCE.code(from: URL(string: "\(redirect)?code=ok&state=expected")!, redirect: redirect, state: "expected"), "ok")
+        XCTAssertThrowsError(try PKCE.code(from: URL(string: "com.tomilenko95.carwidget://evil/callback?code=ok&state=expected")!, redirect: redirect, state: "expected"))
+        XCTAssertThrowsError(try PKCE.code(from: URL(string: "\(redirect)?code=ok&state=wrong")!, redirect: redirect, state: "expected"))
+    }
+    func testConfigurationRejectsUnregisteredNativeSchemeAndCredentials() {
+        for redirect in ["random-app://spotify/callback", "com.tomilenko95.carwidget://spotify/other",
+                         "com.tomilenko95.carwidget://spotify:80/callback", "https://user:password@login.test.org/spotify/callback"] {
+            let config = AppConfiguration(clientID: Fixtures.config.clientID, redirectURI: redirect, appGroup: "", keychainGroup: nil)
+            XCTAssertNil(config.callbackURL)
+        }
+    }
     func testCodeExchangeIncludesVerifierAndRetainsRefreshToken() async throws {
         let (api, mock, store) = Fixtures.api([.init(body: "{\"access_token\":\"new\",\"refresh_token\":\"r\",\"expires_in\":3600}")], store: MemoryTokens())
         try await api.tokens.exchange(code: "code", verifier: "verifier")

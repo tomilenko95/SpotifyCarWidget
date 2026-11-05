@@ -7,10 +7,12 @@ configs:
   Debug: debug
   Release: release
   Personal: release
+  PersonalSpotify: release
 configFiles:
   Debug: Config/Spotify.xcconfig
   Release: Config/Spotify.xcconfig
   Personal: Config/Spotify.xcconfig
+  PersonalSpotify: Config/PersonalSpotify.xcconfig
 settings:
   base:
     SWIFT_VERSION: '5.0'
@@ -21,6 +23,8 @@ settings:
   configs:
     Personal:
       SWIFT_ACTIVE_COMPILATION_CONDITIONS: '$(inherited) PERSONAL_DEMO'
+    PersonalSpotify:
+      SWIFT_ACTIVE_COMPILATION_CONDITIONS: '$(inherited) PERSONAL_SPOTIFY'
 targets:
   SpotifyCarWidget:
     type: application
@@ -47,6 +51,8 @@ targets:
       configs:
         Personal:
           CODE_SIGN_ENTITLEMENTS: Config/Personal.entitlements
+        PersonalSpotify:
+          CODE_SIGN_ENTITLEMENTS: Config/PersonalSpotify.entitlements
     dependencies:
       - target: SpotifyWidgets
         embed: true
@@ -75,6 +81,8 @@ targets:
       configs:
         Personal:
           CODE_SIGN_ENTITLEMENTS: Config/Personal.entitlements
+        PersonalSpotify:
+          CODE_SIGN_ENTITLEMENTS: Config/PersonalSpotify.entitlements
   SpotifyCarWidgetTests:
     type: bundle.unit-test
     platform: iOS
@@ -101,3 +109,11 @@ schemes:
       config: Personal
     archive:
       config: Personal
+  SpotifyCarWidgetPersonalSpotify:
+    build:
+      targets:
+        SpotifyCarWidget: all
+    run:
+      config: PersonalSpotify
+    archive:
+      config: PersonalSpotify

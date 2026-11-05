@@ -9,6 +9,16 @@ on:
         required: false
         default: true
         type: boolean
+      personal_spotify:
+        description: 'Build Spotify Personal with native callback and shared Keychain'
+        required: false
+        default: false
+        type: boolean
+      keychain_team_id:
+        description: 'Public 10-character Apple signing prefix (required for Spotify Personal)'
+        required: false
+        default: ''
+        type: string
 permissions:
   contents: read
 concurrency:
@@ -31,6 +41,8 @@ jobs:
         if: github.event_name == 'workflow_dispatch' && inputs.device_ipa
         env:
           PERSONAL_DEMO: '1'
+          PERSONAL_SPOTIFY: ${{ inputs.personal_spotify && '1' || '0' }}
+          KEYCHAIN_TEAM_ID: ${{ inputs.keychain_team_id }}
         run: bash CI/unsigned.sh
       - uses: actions/upload-artifact@v4
         if: always()

@@ -15,6 +15,7 @@ struct PlaybackTimeline: TimelineProvider {
     func getTimeline(in context: Context, completion: @escaping (Timeline<PlaybackEntry>) -> Void) {
         Task {
             let snapshot = await SpotifyPlaybackService.shared.refresh()
+            WidgetConnectionCheck.acknowledge()
             completion(Self.timeline(snapshot: snapshot))
         }
     }

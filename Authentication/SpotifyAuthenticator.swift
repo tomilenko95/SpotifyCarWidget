@@ -15,8 +15,14 @@ final class SpotifyAuthenticator: NSObject, ASWebAuthenticationPresentationConte
             try Task.checkCancellation()
             return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<URL, Error>) in
                 pending = continuation
-                let auth = ASWebAuthenticationSession(url: url, callback: .https(host: host, path: redirect.path)) { [weak self] url, error in
+                let completion: ASWebAuthenticationSession.CompletionHandler = { [weak self] url, error in
                     Task { @MainActor in self?.finish(url: url, error: error) }
+                }
+                let auth: ASWebAuthenticationSession
+                if redirect.scheme == "https" {
+                    auth = ASWebAuthenticationSession(url: url, callback: .https(host: host, path: redirect.path), completionHandler: completion)
+                } else {
+                    auth = ASWebAuthenticationSession(url: url, callbackURLScheme: AppConfiguration.nativeCallbackScheme, completionHandler: completion)
                 }
                 auth.presentationContextProvider = self
                 auth.prefersEphemeralWebBrowserSession = true
