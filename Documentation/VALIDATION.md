@@ -1,6 +1,24 @@
 # Результаты проверки — 05.11.2026
 
-Среда: Windows, PowerShell, Node.js 24; bundled Python 3.12. Swift compiler, Apple SDK, Xcode и подключённый macOS CI в этой сессии отсутствуют.
+Разработка: Windows, PowerShell, Node.js 24, bundled Python 3.12. Сборка: стандартный macOS-раннер GitHub Actions в публичном репозитории.
+
+## Подтверждённая сборка и запуск
+
+[Workflow 42077207345](https://github.com/tomilenko95/SpotifyCarWidget/actions/runs/42077207345) для исходного commit `84005be` завершился **success** 05.11.2026.
+
+- XcodeGen сгенерировал настоящий Xcode project.
+- `xcodebuild test`: **35 тестов, 0 failures**, `TEST SUCCEEDED`.
+- Сборка Personal для iPhone Simulator: `BUILD SUCCEEDED`.
+- `simctl install` и `simctl launch`: приложение установлено и запущено в симуляторе.
+- Снимок `CarWidget-iPhone-Simulator.png` просмотрен: главный экран, демо-обложка, метаданные, прогресс и кнопки отображаются.
+- Device-сборка Personal: `BUILD SUCCEEDED`; создан `UNSIGNED-requires-signing.ipa`.
+- IPA проверен через zip/plist: платформа `iphoneos`, minimum iOS 26.0, приложение `com.example.SpotifyCarWidget`, вложенное расширение `com.example.SpotifyCarWidget.widgets`, extension point `com.apple.widgetkit-extension`.
+
+Artifacts: `Tests.xcresult`, `Simulator.app.zip`, `CarWidget-iPhone-Simulator.png`, `UNSIGNED-requires-signing.ipa`. GitHub хранит их 3 дня по настройке workflow; для дальнейшего использования скачайте локально или повторите сборку.
+
+Это подтверждает компиляцию и запуск демо в симуляторе. IPA пока **не подписан**; установленным на физический iPhone его считать нельзя.
+
+## Локальные проверки Windows
 
 Выполнено успешно:
 
@@ -12,15 +30,14 @@
 - Ручной просмотр кода, в том числе PKCE/state, token refresh, ограничения команд и файловый доступ; сверка официальных источников Spotify/Apple/Codemagic.
 - В исходном HTML официальной таблицы capabilities проверены отметки: App Groups и Keychain Sharing доступны также бесплатному Apple Developer; Associated Domains — только ADP/ADEP.
 
-В проекте **35 XCTest-методов**. Их исходники созданы; они **не выполнялись** на Windows. Отсутствие ошибок грамматического парсера не проверяет типы Swift, AppIntent metadata extraction, SwiftUI generic inference, linking, signing, SDK availability или runtime.
+В проекте **35 XCTest-методов**. Они выполнены на macOS CI, а не на Windows. Грамматический парсер использовался только как предварительная проверка; результат Xcode и XCTest подтверждён отдельно.
 
 Не выполнено:
 
-- генерация проекта реальным XcodeGen на macOS и `xcodebuild`;
-- simulator XCTest / previews / проверка в CarPlay Simulator;
-- сборка и подпись IPA, загрузка в App Store Connect;
+- интерактивная проверка всех Xcode previews и CarPlay Simulator;
+- подпись IPA, загрузка в App Store Connect;
 - реальная Spotify OAuth/API с аккаунтом пользователя;
 - установка на iPhone 15 Pro и проверка сенсорного CarPlay;
 - проверка бесплатной альтернативной переподписи с сохранением Widget Extension.
 
-Причина: отсутствуют GitHub remote, подключённый Codemagic, macOS runner, пользовательский Client ID/HTTPS host и signing assets. Для следующего шага выполните Documentation/BUILD-WINDOWS.md и сначала запустите simulator-tests. До успешного xcodebuild проект нельзя объявлять скомпилированным, а unsigned IPA — устанавливаемым.
+GitHub подключён и cloud build работает. Сейчас готовится бесплатная установка Personal demo через Sideloadly на Windows; компоненты iTunes, Apple Mobile Device Support и iCloud установлены. Фактическое обнаружение iPhone в Sideloadly, подпись и запуск на телефоне пока не подтверждены. Для Full Spotify-варианта по-прежнему нужны пользовательский Client ID, HTTPS host и соответствующие capabilities подписи.

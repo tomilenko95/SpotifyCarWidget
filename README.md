@@ -2,15 +2,15 @@
 
 Нативное iOS 26+ приложение на SwiftUI с тремя отдельными WidgetKit-виджетами: **Compact**, **Controls**, **Cover Focus**. Каждый поддерживает `systemSmall` для iPhone, StandBy и CarPlay; Controls также имеет `systemMedium` для iPhone. В приложении: проигрыватель, галерея, настройки темы, диагностика и автономное демо.
 
-**Статус:** исходники и конфигурации созданы на Windows. Настоящая сборка Xcode и XCTest здесь не запускались; работоспособность бинарного файла ещё должна подтвердить macOS CI. Нет опубликованного IPA и результата проверки на автомобиле. Не считайте локальную статическую проверку подтверждением компиляции.
+**Статус на 05.11.2026:** настоящая сборка Xcode в [GitHub Actions](https://github.com/tomilenko95/SpotifyCarWidget/actions/runs/42077207345) прошла успешно. **35 XCTest-тестов, 0 ошибок**; Personal demo собрана и запущена в iPhone Simulator, получен снимок экрана. Собран unsigned device IPA с Widget Extension. Установка на физический iPhone, подпись, реальная Spotify OAuth и проверка CarPlay ещё не подтверждены. [Подробный отчёт](Documentation/VALIDATION.md).
 
 ## Начать с Windows
 
 1. Установите Git и Node.js 22+; Xcode на Windows не требуется.
 2. В PowerShell в этой папке выполните `node CI/validate.cjs` или `./CI/validate.ps1`.
-3. Создайте репозиторий GitHub и загрузите файлы по [инструкции сборки](Documentation/BUILD-WINDOWS.md).
-4. В Codemagic выберите workflow `simulator-tests`. Он создаёт `.xcodeproj` через XcodeGen, запускает XCTest на iOS Simulator и проверяет Personal-конфигурацию.
-5. Для автономной device-сборки выберите `unsigned-device`. Полученный файл **UNSIGNED-requires-signing.ipa не устанавливается без дополнительной подписи**.
+3. Репозиторий проекта: [tomilenko95/SpotifyCarWidget](https://github.com/tomilenko95/SpotifyCarWidget). Для своей копии используйте [инструкцию сборки](Documentation/BUILD-WINDOWS.md).
+4. Бесплатный маршрут: GitHub Actions → **Build CarWidget** → **Run workflow**, параметр `device_ipa` включён. Codemagic для этого не нужен.
+5. Из artifacts `ios-results` скачайте device IPA и снимок работающего приложения. **UNSIGNED-requires-signing.ipa не устанавливается без дополнительной подписи**. Альтернатива в Codemagic — `unsigned-device`.
 6. Для настоящего Spotify настройте [OAuth и подпись](Documentation/SPOTIFY-SETUP.md), затем `signed-device` и [установку на iPhone](Documentation/INSTALL-IPHONE.md).
 
 Полноценные синхронизированные Spotify-виджеты требуют доступных App Groups, общего Keychain и Associated Domains. По актуальной таблице Apple App Groups и Keychain Sharing доступны также бесплатному Apple Developer, **Associated Domains — нет**. В поставляемом полном пути нужны Apple Developer Program и соответствующие profiles обоих targets именно из-за HTTPS OAuth и подписи. Предусмотрен отдельный `Personal` **только демо** без дополнительных entitlements для максимально переносимой переподписи: приложение и расширение имеют независимые локальные состояния. Три виджета внутри одного расширения делят его локальное состояние. Бесплатная установка полного Spotify-варианта с Windows без Mac не подтверждена. [Таблица Apple](https://developer.apple.com/help/account/reference/supported-capabilities-ios/).

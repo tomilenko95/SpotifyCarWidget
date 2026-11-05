@@ -21,7 +21,7 @@
 
 ## Что ещё не подтверждено испытанием
 
-1. Компиляция Xcode, XCTest, работа всех previews и отсутствие SDK-specific diagnostics: Windows не содержит Xcode, CI ещё не подключён.
+1. Работа всех previews и визуальных режимов виджетов. Компиляция Xcode, 35 XCTest и запуск Personal demo в симуляторе уже подтверждены [успешным CI](https://github.com/tomilenko95/SpotifyCarWidget/actions/runs/42077207345); это не заменяет проверку виджетов в CarPlay.
 2. Реальная OAuth с пользовательским Client ID / доменом / подписью, работа Keychain group после переустановки и refresh token rotation конкретного Spotify account.
 3. Фактическая отзывчивость интерактивных кнопок WidgetKit при закрытом приложении на iOS 26 и в автомобиле пользователя.
 4. Поведение до/после lock, CarPlay margins, Dynamic Type, night mode/StandBy и геометрия на разных головных устройствах.
