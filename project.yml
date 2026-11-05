@@ -1,0 +1,103 @@
+name: SpotifyCarWidget
+options:
+  bundleIdPrefix: com.example
+  deploymentTarget:
+    iOS: '26.0'
+configs:
+  Debug: debug
+  Release: release
+  Personal: release
+configFiles:
+  Debug: Config/Spotify.xcconfig
+  Release: Config/Spotify.xcconfig
+  Personal: Config/Spotify.xcconfig
+settings:
+  base:
+    SWIFT_VERSION: '5.0'
+    TARGETED_DEVICE_FAMILY: '1'
+    MARKETING_VERSION: '1.0.0'
+    CURRENT_PROJECT_VERSION: '1'
+    CODE_SIGN_STYLE: Automatic
+  configs:
+    Personal:
+      SWIFT_ACTIVE_COMPILATION_CONDITIONS: '$(inherited) PERSONAL_DEMO'
+targets:
+  SpotifyCarWidget:
+    type: application
+    platform: iOS
+    sources:
+      - App
+      - Features
+      - Authentication
+      - SpotifyAPI
+      - Playback
+      - AppIntents
+      - Models
+      - Storage
+      - Services
+      - path: Widgets/Shared
+      - path: Widgets/PlaybackTimeline.swift
+      - path: Assets/Assets.xcassets
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: '$(APP_BUNDLE_ID)'
+        INFOPLIST_FILE: Config/App-Info.plist
+        CODE_SIGN_ENTITLEMENTS: Config/App.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+      configs:
+        Personal:
+          CODE_SIGN_ENTITLEMENTS: Config/Personal.entitlements
+    dependencies:
+      - target: SpotifyWidgets
+        embed: true
+  SpotifyWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - Widgets
+      - Authentication/PKCE.swift
+      - Authentication/TokenStore.swift
+      - SpotifyAPI
+      - Playback
+      - AppIntents
+      - Models
+      - Storage
+      - Services
+      - Assets/Assets.xcassets
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: '$(APP_BUNDLE_ID).widgets'
+        INFOPLIST_FILE: Config/Widget-Info.plist
+        CODE_SIGN_ENTITLEMENTS: Config/Widget.entitlements
+        APPLICATION_EXTENSION_API_ONLY: YES
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: '$(inherited) WIDGET_EXTENSION'
+        SKIP_INSTALL: YES
+      configs:
+        Personal:
+          CODE_SIGN_ENTITLEMENTS: Config/Personal.entitlements
+  SpotifyCarWidgetTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [Tests]
+    dependencies:
+      - target: SpotifyCarWidget
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  SpotifyCarWidget:
+    build:
+      targets:
+        SpotifyCarWidget: all
+    test:
+      targets: [SpotifyCarWidgetTests]
+    archive:
+      config: Release
+  SpotifyCarWidgetPersonal:
+    build:
+      targets:
+        SpotifyCarWidget: all
+    run:
+      config: Personal
+    archive:
+      config: Personal

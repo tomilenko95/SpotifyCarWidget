@@ -1,0 +1,7 @@
+{
+  "images": [
+    { "filename": "spotify-black.png", "idiom": "universal" },
+    { "filename": "spotify-white.png", "idiom": "universal", "appearances": [{ "appearance": "luminosity", "value": "dark" }] }
+  ],
+  "info": { "author": "xcode", "version": 1 }
+}

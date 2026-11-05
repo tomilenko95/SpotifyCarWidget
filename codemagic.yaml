@@ -1,0 +1,50 @@
+workflows:
+  simulator-tests:
+    name: iOS 26 simulator and unit tests
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      xcode: latest
+      node: 22
+    scripts:
+      - name: Validate, generate project, test and build Personal
+        script: bash CI/test.sh
+    artifacts:
+      - build/Simulator.app.zip
+      - build/CarWidget-iPhone-Simulator.png
+      - build/Tests.xcresult
+      - /tmp/xcodebuild_logs/*.log
+  unsigned-device:
+    name: UNSIGNED device bundle - cannot install directly
+    instance_type: mac_mini_m2
+    max_build_duration: 45
+    environment:
+      xcode: latest
+      vars:
+        PERSONAL_DEMO: '1'
+    scripts:
+      - name: Build unsigned Personal demo for ARM64
+        script: bash CI/unsigned.sh
+    artifacts:
+      - build/UNSIGNED-requires-signing.ipa
+  signed-device:
+    name: Signed Ad Hoc - paid membership and two profiles required
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      xcode: latest
+      groups:
+        - spotify_public_config
+      ios_signing:
+        provisioning_profiles:
+          - carwidget_app_adhoc
+          - carwidget_widgets_adhoc
+        certificates:
+          - carwidget_distribution
+    scripts:
+      - name: Configure, sign, archive and export
+        script: bash CI/signed.sh
+    artifacts:
+      - build/ipa/*.ipa
+      - build/archive/*.xcarchive
+      - /tmp/xcodebuild_logs/*.log

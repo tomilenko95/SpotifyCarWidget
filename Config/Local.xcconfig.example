@@ -1,0 +1,5 @@
+APP_BUNDLE_ID = com.yourname.SpotifyCarWidget
+APP_GROUP = group.com.yourname.SpotifyCarWidget
+OAUTH_HOST = login.your-domain.com
+SPOTIFY_CLIENT_ID = paste_public_client_id_here
+DEVELOPMENT_TEAM = YOURTEAMID

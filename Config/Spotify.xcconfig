@@ -1,0 +1,9 @@
+// Public configuration; no client secret is used. Local file is ignored by git.
+APP_BUNDLE_ID = com.example.SpotifyCarWidget
+APP_GROUP = group.com.example.SpotifyCarWidget
+OAUTH_HOST = login.example.com
+SPOTIFY_CLIENT_ID =
+// $() prevents xcconfig treating the HTTPS slashes as a comment.
+SPOTIFY_REDIRECT_URI = https:/$()/$(OAUTH_HOST)/spotify/callback
+KEYCHAIN_GROUP = $(AppIdentifierPrefix)$(APP_BUNDLE_ID).shared
+#include? "Local.xcconfig"

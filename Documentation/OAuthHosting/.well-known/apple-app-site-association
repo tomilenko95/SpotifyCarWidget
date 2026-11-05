@@ -1,0 +1,13 @@
+{
+  "webcredentials": {
+    "apps": ["TEAMID.com.yourname.SpotifyCarWidget"]
+  },
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["TEAMID.com.yourname.SpotifyCarWidget"],
+        "components": [{ "/": "/spotify/callback" }]
+      }
+    ]
+  }
+}

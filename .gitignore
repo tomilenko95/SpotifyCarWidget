@@ -1,0 +1,17 @@
+.DS_Store
+DerivedData/
+build/
+*.xcodeproj/
+*.xcworkspace/
+*.xcuserstate
+Config/Local.xcconfig
+*.p12
+*.mobileprovision
+*.p8
+*.ipa
+*.xcarchive/
+*.xcresult/
+.env
+node_modules/
+__pycache__/
+*.pyc

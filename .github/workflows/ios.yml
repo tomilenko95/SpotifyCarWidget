@@ -1,0 +1,44 @@
+name: Build CarWidget
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      device_ipa:
+        description: 'Also build unsigned Personal demo IPA for iPhone'
+        required: false
+        default: true
+        type: boolean
+permissions:
+  contents: read
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  ios:
+    # Public repositories use free standard runners. Never start this job on a paid/private runner.
+    if: github.event.repository.private == false
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build and test on installed iOS 26 simulator
+        run: bash CI/test.sh
+      - name: Build unsigned iPhone demo
+        if: github.event_name == 'workflow_dispatch' && inputs.device_ipa
+        env:
+          PERSONAL_DEMO: '1'
+        run: bash CI/unsigned.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ios-results
+          retention-days: 3
+          path: |
+            build/Tests.xcresult
+            build/Simulator.app.zip
+            build/CarWidget-iPhone-Simulator.png
+            build/UNSIGNED-requires-signing.ipa
